@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"math"
 	"strconv"
 	"strings"
 )
@@ -19,9 +18,10 @@ type Point struct {
 	x, y int
 }
 
-func getCoordinates(paths []string) map[Point]bool {
+func getCoordinates(paths []string) map[Point]uint {
 	x, y := 0, 0
-	points := make(map[Point]bool, len(paths)*10)
+	var totalSteps uint = 0
+	points := make(map[Point]uint, len(paths)*10)
 	var stepMeth func()
 
 	for _, path := range paths {
@@ -44,54 +44,62 @@ func getCoordinates(paths []string) map[Point]bool {
 			// skipping first step, bc it's already in there
 			// or (0, 0) at start, which doesn't matter
 			stepMeth()
-			// we can do this because crossing the wire with itself doesn't matter
-			points[Point{x, y}] = true
+			totalSteps++
 			steps--
+			if _, ok := points[Point{x, y}]; ok {
+				// we already has been here, so the number of steps
+				// should be the value from the first time
+				continue
+			} else {
+				points[Point{x, y}] = totalSteps
+			}
 		}
 	}
 
 	return points
 }
 
-func findCommonPoints(first, second map[Point]bool) []Point {
-	maxLen := int(math.Max(float64(len(first)), float64(len(second))))
-	common := make([]Point, 0, maxLen)
+func findCommonPoints(first, second map[Point]uint) map[Point][2]uint {
+	common := make(map[Point][2]uint)
 
-	for firstPoint := range first {
-		if second[firstPoint] {
+	for firstPoint, firstSteps := range first {
+		if secondSteps, ok := second[firstPoint]; ok {
 			fmt.Println("Found crossing:", firstPoint)
-			common = append(common, firstPoint)
+			common[firstPoint] = [2]uint{firstSteps, secondSteps}
 		}
 	}
 	return common
 }
 
-func findMinimumDistance(points []Point) int {
-	minPoint := points[0]
-	minDist := distanceToZero(minPoint)
+func findMinSteps(points map[Point][2]uint) uint {
+	var minPoint Point
+	var minStepSum uint
 
-	for _, p := range points {
-		dist := distanceToZero(p)
-		if dist < minDist {
-			minPoint = p
-			minDist = dist
+	// we take a random element, because maps don't have a notion of "first"
+	// and this is the simplest data type we can use for this function,
+	// because Go doesn't have a tuple type
+	for point, steps := range points {
+		minPoint = point
+		minStepSum = steps[0] + steps[1]
+	}
+
+	for point, steps := range points {
+		stepSum := steps[0] + steps[1]
+		if stepSum < minStepSum {
+			minPoint = point
+			minStepSum = stepSum
 		}
 	}
 
-	fmt.Printf("Minimum distance: %v, with points: %v\n", minDist, minPoint)
-	return minDist
-}
-
-func distanceToZero(coord Point) int {
-	x, y := float64(coord.x), float64(coord.y)
-	return int(math.Abs(x) + math.Abs(y))
+	fmt.Printf("Minimum steps: %v, with points: %v\n", minStepSum, minPoint)
+	return minStepSum
 }
 
 func main() {
 	content, _ := ioutil.ReadFile("day3-input.txt")
 	lines := strings.Split(string(content), "\n")
 
-	wireCoordinates := make([]map[Point]bool, 2, 2)
+	wireCoordinates := make([]map[Point]uint, 2, 2)
 
 	for i := 0; i < 2; i++ {
 		fmt.Printf("%v. wire ", i+1)
@@ -101,6 +109,6 @@ func main() {
 	}
 
 	commonPoints := findCommonPoints(wireCoordinates[0], wireCoordinates[1])
-	minDist := findMinimumDistance(commonPoints)
-	fmt.Println("Result:", minDist)
+	minStepSum := findMinSteps(commonPoints)
+	fmt.Println("Result:", minStepSum)
 }
