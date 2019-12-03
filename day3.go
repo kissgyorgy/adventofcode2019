@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -73,15 +74,7 @@ func findCommonPoints(first, second map[Point]uint) map[Point][2]uint {
 
 func findMinSteps(points map[Point][2]uint) uint {
 	var minPoint Point
-	var minStepSum uint
-
-	// we take a random element, because maps don't have a notion of "first"
-	// and this is the simplest data type we can use for this function,
-	// because Go doesn't have a tuple type
-	for point, steps := range points {
-		minPoint = point
-		minStepSum = steps[0] + steps[1]
-	}
+	var minStepSum uint = math.MaxUint64
 
 	for point, steps := range points {
 		stepSum := steps[0] + steps[1]
