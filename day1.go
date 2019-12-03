@@ -26,7 +26,7 @@ func main() {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		massStr := scanner.Text()
-		mass, _ := strconv.ParseInt(massStr, 10, 64)
+		mass, _ := strconv.ParseInt(massStr, 10, 0)
 		fmt.Println("Got mass:", mass)
 		totalFuelNeededForMass = calculateFuel(int(mass))
 		fmt.Println("Total fuel needed for mass:", totalFuelNeededForMass)
