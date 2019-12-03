@@ -25,14 +25,13 @@ func runIntcode(program []int) {
 			return
 		}
 
-		switch pos1, pos2 = program[i+1], program[i+2]; op {
+		pos1, pos2, pos3 = program[i+1], program[i+2], program[i+3]
+		switch op {
 		case add:
 			res = program[pos1] + program[pos2]
 		case multiply:
 			res = program[pos1] * program[pos2]
 		}
-
-		pos3 = program[i+3]
 		program[pos3] = res
 	}
 }
