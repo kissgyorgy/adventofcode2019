@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+const (
+	noun = 1
+	verb = 2
+)
+
 type opCode int
 
 const (
@@ -17,43 +22,55 @@ const (
 
 func runIntcode(program []int) {
 	var op opCode
-	var res, pos1, pos2, pos3 int
+	var param1, param2, param3 int
+	var value1, value2, res int
 
-	for i := 0; ; i += 4 {
-		op = opCode(program[i])
+	for addr := 0; ; addr += 4 {
+		instr := program[addr : addr+4]
+
+		op = opCode(instr[0])
 		if op == halt {
 			return
 		}
 
-		pos1, pos2, pos3 = program[i+1], program[i+2], program[i+3]
+		param1, param2, param3 = instr[1], instr[2], instr[3]
+		value1, value2 = program[param1], program[param2]
 		switch op {
 		case add:
-			res = program[pos1] + program[pos2]
+			res = value1 + value2
 		case multiply:
-			res = program[pos1] * program[pos2]
+			res = value1 * value2
 		}
-		program[pos3] = res
+		program[param3] = res
 	}
 }
 
-func convertToProgram(content []byte) []int {
-	input := strings.Split(string(content), ",")
-	program := make([]int, len(input), len(input))
+func loadProgram(filename string) []string {
+	content, _ := ioutil.ReadFile(filename)
+	return strings.Split(string(content), ",")
+}
+
+func initMemory(input []string) []int {
+	memory := make([]int, len(input), len(input))
 	for i, v := range input {
 		num, _ := strconv.ParseInt(v, 10, 0)
-		program[i] = int(num)
+		memory[i] = int(num)
 	}
-	return program
+	return memory
 }
 
 func main() {
-	content, _ := ioutil.ReadFile("day2-input.txt")
-	program := convertToProgram(content)
-	program[1] = 12
-	program[2] = 2
-	fmt.Println("IntCode Program:", program)
+	intcode := loadProgram("day2-input.txt")
+	memory := initMemory(intcode)
 
-	runIntcode(program)
-	fmt.Println("Program after running:", program)
-	fmt.Println("Result:", program[0])
+	noun, verb := 12, 2
+	memory[1] = noun
+	memory[2] = verb
+	fmt.Println("Initial memory:", memory)
+
+	runIntcode(memory)
+	fmt.Println("Memory after running Intcode:", memory)
+
+	output := memory[0]
+	fmt.Println("Result:", output)
 }
