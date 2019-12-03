@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	noun = 1
-	verb = 2
+	noun         = 1
+	verb         = 2
+	searchOutput = 19690720
 )
 
 type opCode int
@@ -61,16 +62,24 @@ func initMemory(input []string) []int {
 
 func main() {
 	intcode := loadProgram("day2-input.txt")
-	memory := initMemory(intcode)
+	initialMemory := initMemory(intcode)
 
-	noun, verb := 12, 2
-	memory[1] = noun
-	memory[2] = verb
-	fmt.Println("Initial memory:", memory)
+	memory := make([]int, len(intcode), len(intcode))
 
-	runIntcode(memory)
-	fmt.Println("Memory after running Intcode:", memory)
-
-	output := memory[0]
-	fmt.Println("Result:", output)
+	for noun := 0; noun < 100; noun++ {
+		for verb := 0; verb < 100; verb++ {
+			copy(memory, initialMemory)
+			memory[1] = noun
+			memory[2] = verb
+			fmt.Println("Initial memory:", memory)
+			runIntcode(memory)
+			fmt.Println("Memory after running Intcode:", memory)
+			output := memory[0]
+			if output == searchOutput {
+				fmt.Println("Noun, verb:", noun, verb)
+				fmt.Println("Result:", 100*noun+verb)
+				return
+			}
+		}
+	}
 }
