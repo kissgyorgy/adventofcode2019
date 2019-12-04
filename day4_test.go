@@ -7,11 +7,32 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type TestCase struct {
+	num      int
+	expected bool
+}
+
+func runRuleTests(t *testing.T, tests []TestCase, ruleFunc Rule) {
+	t.Helper()
+
+	var result bool
+	var label string
+
+	for _, tt := range tests {
+		label = fmt.Sprintf("%d-%v", tt.num, tt.expected)
+		t.Run(label, func(t *testing.T) {
+			result = ruleFunc(tt.num)
+			if tt.expected {
+				assert.True(t, result)
+			} else {
+				assert.False(t, result)
+			}
+		})
+	}
+}
+
 func TestDigitsNeverDecrease(t *testing.T) {
-	tests := []struct {
-		num      int
-		expected bool
-	}{
+	tests := []TestCase{
 		{0, true},
 		{100, false},
 		{102, false},
@@ -21,19 +42,16 @@ func TestDigitsNeverDecrease(t *testing.T) {
 		{543, false},
 		{223450, false},
 	}
+	runRuleTests(t, tests, digitsNeverDecrease)
+}
 
-	var result bool
-	var label string
-
-	for _, tt := range tests {
-		label = fmt.Sprintf("%d-%v", tt.num, tt.expected)
-		t.Run(label, func(t *testing.T) {
-			result = digitsNeverDecrease(tt.num)
-			if tt.expected {
-				assert.True(t, result)
-			} else {
-				assert.False(t, result)
-			}
-		})
+func TestTwoAdjacentDigitsAreTheSame(t *testing.T) {
+	tests := []TestCase{
+		{100, true},
+		{101, false},
+		{12345, false},
+		{111111, true},
+		{123789, false},
 	}
+	runRuleTests(t, tests, twoAdjacentDigitsAreTheSame)
 }
