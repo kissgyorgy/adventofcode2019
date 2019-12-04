@@ -12,7 +12,7 @@ type Rule func(int) bool
 // compareDigits compares digits in a number one-by-one, applying the condition function
 // and returning with successResult if the condition is true for any two digits.
 // returns the negation of successResult at the end if condition never was true
-func compareDigits(num int, condition func(int, int) bool, successResult bool) bool {
+func compareDigits(num int, condition func(int, int) bool, successResult bool, lastCondition func() bool) bool {
 	var remain int
 	prevRemain := num % 10
 	for num > 1 {
@@ -23,37 +23,37 @@ func compareDigits(num int, condition func(int, int) bool, successResult bool) b
 		}
 		prevRemain = remain
 	}
-	return !successResult
+	return lastCondition()
 }
 
 // Two adjacent digits are the same (like 22 in 122345).
 func twoAdjacentDigitsAreTheSameAtleastOnce(num int) bool {
-	var currentDigit int
-	prevDigit := num % 10
 	count := 1
 
-	for num > 1 {
-		num /= 10
-		currentDigit = num % 10
-		if count == 2 && prevDigit != currentDigit {
+	conditionFunc := func(first, second int) bool {
+		if count == 2 && first != second {
 			return true
-		} else if prevDigit != currentDigit {
+		} else if first != second {
 			count = 1
-		} else if prevDigit == currentDigit {
+		} else if first == second {
 			count++
 		}
-		prevDigit = currentDigit
+		return false
 	}
 
-	// we need to check the last two digits
-	return count == 2
+	// we need to check the last two digits, because there will be no more
+	// but we can't know that inside the conditionFunc
+	lastConditionFunc := func() bool { return count == 2 }
+
+	return compareDigits(num, conditionFunc, true, lastConditionFunc)
 }
 
 // Going from left to right, the digits never decrease
 // they only ever increase or stay the same (like 111123 or 135679)
 func digitsNeverDecrease(num int) bool {
 	conditionFunc := func(first, second int) bool { return first < second }
-	return compareDigits(num, conditionFunc, false)
+	lastConditionFunc := func() bool { return true }
+	return compareDigits(num, conditionFunc, false, lastConditionFunc)
 }
 
 func allRulesApply(password int, rules []Rule) bool {
