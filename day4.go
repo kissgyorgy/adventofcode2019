@@ -27,9 +27,26 @@ func compareDigits(num int, condition func(int, int) bool, successResult bool) b
 }
 
 // Two adjacent digits are the same (like 22 in 122345).
-func twoAdjacentDigitsAreTheSame(num int) bool {
-	conditionFunc := func(first, second int) bool { return first == second }
-	return compareDigits(num, conditionFunc, true)
+func twoAdjacentDigitsAreTheSameAtleastOnce(num int) bool {
+	var currentDigit int
+	prevDigit := num % 10
+	count := 1
+
+	for num > 1 {
+		num /= 10
+		currentDigit = num % 10
+		if count == 2 && prevDigit != currentDigit {
+			return true
+		} else if prevDigit != currentDigit {
+			count = 1
+		} else if prevDigit == currentDigit {
+			count++
+		}
+		prevDigit = currentDigit
+	}
+
+	// we need to check the last two digits
+	return count == 2
 }
 
 // Going from left to right, the digits never decrease
@@ -62,7 +79,7 @@ func main() {
 	var rules = []Rule{
 		// "six-digit" and "value within the given range" rules
 		// are implicit by using start and end input
-		twoAdjacentDigitsAreTheSame,
+		twoAdjacentDigitsAreTheSameAtleastOnce,
 		digitsNeverDecrease,
 	}
 	res := countPasswords(start, end, rules)

@@ -50,8 +50,13 @@ func TestTwoAdjacentDigitsAreTheSame(t *testing.T) {
 		{100, true},
 		{101, false},
 		{12345, false},
-		{111111, true},
+		{111111, false},
+		{112345, true},
+		{123345, true},
 		{123789, false},
+		{112233, true},
+		{123444, false},
+		{111122, true},
 	}
-	runRuleTests(t, tests, twoAdjacentDigitsAreTheSame)
+	runRuleTests(t, tests, twoAdjacentDigitsAreTheSameAtleastOnce)
 }
