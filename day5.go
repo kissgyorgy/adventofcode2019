@@ -41,11 +41,8 @@ func initMemory(input []string) []int {
 }
 
 // get nth digit of number counted from rigth to left
-func getNthDigitFromRight(num, nth int) int {
-	// first we "cut" the part left to digit
-	num %= int(math.Pow10(nth + 1))
-	// then we divide and floor the remainder
-	return num / int(math.Pow10(nth))
+func getNthDigitFromRight(num, ind int) int {
+	return num / int(math.Pow10(ind)) % 10
 }
 
 func getParam(memory []int, opAddr, nth int) int {
