@@ -28,7 +28,8 @@ const (
 
 func loadProgram(filename string) []string {
 	content, _ := ioutil.ReadFile(filename)
-	return strings.Split(string(content), ",")
+	stringContent := strings.TrimSpace(string(content))
+	return strings.Split(stringContent, ",")
 }
 
 func initMemory(input []string) []int {
