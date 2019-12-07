@@ -13,6 +13,7 @@ const (
 
 var (
 	phaseSettings = []int{0, 1, 2, 3, 4}
+	amplifiers    = []string{"A", "B", "C", "D", "E"}
 )
 
 func main() {
@@ -26,7 +27,7 @@ func main() {
 		fmt.Println("Phase settings:", phase)
 		copy(memory, initMemory)
 		inputSignal := 0
-		for i := 0; i < 5; i++ {
+		for i, _ := range amplifiers {
 			outputs := intcode.Run(initMemory, phase[i], inputSignal)
 			fmt.Println("Outputs:", outputs)
 			inputSignal = outputs[0]
