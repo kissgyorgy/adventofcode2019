@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	"image/png"
 	"io"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -93,8 +97,40 @@ func printImage(image []color, width, height int) {
 	fmt.Println()
 }
 
+func makeImage(img []color) image.Image {
+	const (
+		dx = width
+		dy = height
+	)
+	m := image.NewNRGBA(image.Rect(0, 0, dx, dy))
+	for y := 0; y < dy; y++ {
+		for x := 0; x < dx; x++ {
+			ind := y*dx + x
+			v := uint8(img[ind]) * 150
+			i := y*m.Stride + x*4
+
+			m.Pix[i] = v
+			m.Pix[i+1] = v
+			m.Pix[i+2] = 255
+			m.Pix[i+3] = 255
+		}
+	}
+	return m
+}
+
+func savePNG(img image.Image, filename string) {
+	fmt.Println("Saving image:", filename)
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		panic(err)
+	}
+	ioutil.WriteFile(filename, buf.Bytes(), 0644)
+}
+
 func main() {
 	layers := readLayers(imageFile)
-	image := mergeLayers(layers)
-	printImage(image, width, height)
+	finalLayer := mergeLayers(layers)
+	printImage(finalLayer, width, height)
+	img := makeImage(finalLayer)
+	savePNG(img, "image.png")
 }
