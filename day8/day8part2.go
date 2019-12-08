@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/color"
 	"image/png"
 	"io"
 	"io/ioutil"
@@ -21,12 +22,12 @@ const (
 	scale     = 20
 )
 
-type color int
+type myColor int
 
 const (
-	black       color = 0
-	white       color = 1
-	transparent color = 2
+	black       myColor = 0
+	white       myColor = 1
+	transparent myColor = 2
 )
 
 var (
@@ -37,23 +38,23 @@ func isEmpty(b []byte) bool {
 	return strings.TrimSpace(string(b)) == ""
 }
 
-func convertToPixels(b []byte) []color {
-	pixels := make([]color, len(b))
+func convertToPixels(b []byte) []myColor {
+	pixels := make([]myColor, len(b))
 	for i, c := range b {
 		n, err := strconv.ParseUint(string(c), 10, 8)
 		if err != nil {
 			panic("Invalid pixel:" + string(c))
 		}
-		pixels[i] = color(n)
+		pixels[i] = myColor(n)
 	}
 	return pixels
 }
 
-func readLayers(imageFile string) [][]color {
+func readLayers(imageFile string) [][]myColor {
 	f, _ := os.Open(imageFile)
 	defer f.Close()
 
-	layers := make([][]color, 0, 4)
+	layers := make([][]myColor, 0, 4)
 	layer := make([]byte, layerSize)
 
 	i := -1
@@ -71,8 +72,8 @@ func readLayers(imageFile string) [][]color {
 	return layers
 }
 
-func mergeLayers(layers [][]color) []color {
-	image := make([]color, layerSize)
+func mergeLayers(layers [][]myColor) []myColor {
+	image := make([]myColor, layerSize)
 	for i := 0; i < layerSize; i++ {
 		for _, layer := range layers {
 			pix := layer[i]
@@ -85,7 +86,7 @@ func mergeLayers(layers [][]color) []color {
 	return image
 }
 
-func printImage(image []color, width, height int) {
+func printImage(image []myColor, width, height int) {
 	for i, pix := range image {
 		if i%width == 0 && i != 0 {
 			fmt.Println()
@@ -100,22 +101,13 @@ func printImage(image []color, width, height int) {
 	fmt.Println()
 }
 
-func makeImage(img []color) image.Image {
-	const (
-		dx = width
-		dy = height
-	)
-	m := image.NewNRGBA(image.Rect(0, 0, dx, dy))
-	for y := 0; y < dy; y++ {
-		for x := 0; x < dx; x++ {
-			ind := y*dx + x
-			v := uint8(img[ind]) * 150
-			i := y*m.Stride + x*4
-
-			m.Pix[i] = v
-			m.Pix[i+1] = v
-			m.Pix[i+2] = 255
-			m.Pix[i+3] = 255
+func makeImage(img []myColor) image.Image {
+	m := image.NewNRGBA(image.Rect(0, 0, width, height))
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			i := y*width + x
+			v := uint8(img[i]) * 100
+			m.Set(x, y, color.RGBA{0, v, v, 255})
 		}
 	}
 	return m
