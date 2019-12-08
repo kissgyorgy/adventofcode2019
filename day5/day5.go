@@ -15,5 +15,7 @@ func main() {
 	code := intcode.Load(intcodeFile)
 	memory := intcode.Init(code)
 	fmt.Println("Memory:", memory)
-	intcode.Run(memory, inputVal)
+	inputs, outputs := make(chan int, 1), make(chan int, 1)
+	inputs <- inputVal
+	intcode.Run(memory, inputs, outputs)
 }

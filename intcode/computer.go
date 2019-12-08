@@ -19,10 +19,9 @@ const (
 	halt        opCode = 99
 )
 
-func Run(memory []int, inputs ...int) []int {
+func Run(memory []int, inputs, outputs chan int) {
 	var op opCode
 	var param1, param2, respos int
-	var outputs []int
 
 	for addr := 0; ; {
 		fmt.Println("----")
@@ -30,7 +29,8 @@ func Run(memory []int, inputs ...int) []int {
 		fmt.Println("Addr", addr)
 		op = opCode(memory[addr] % 100)
 		if op == halt {
-			return outputs
+			close(outputs)
+			return
 		}
 
 		param1 = getParam(memory, addr, 1)
@@ -54,14 +54,14 @@ func Run(memory []int, inputs ...int) []int {
 
 		case input:
 			respos = memory[addr+1]
-			fmt.Printf("INPUT: %v => %v\n", inputs[0], respos)
-			memory[respos] = inputs[0]
-			inputs = inputs[1:]
+			in := <-inputs
+			fmt.Printf("INPUT: %v => %v\n", in, respos)
+			memory[respos] = in
 			addr += 2
 
 		case output:
 			fmt.Printf("OUT: %d \n", param1)
-			outputs = append(outputs, param1)
+			outputs <- param1
 			addr += 2
 
 		case jumpIfTrue:
