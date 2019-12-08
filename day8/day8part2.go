@@ -10,12 +10,15 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"golang.org/x/image/draw"
 )
 
 const (
 	imageFile = "day8-input.txt"
 	width     = 25
 	height    = 6
+	scale     = 20
 )
 
 type color int
@@ -118,6 +121,14 @@ func makeImage(img []color) image.Image {
 	return m
 }
 
+func scaleImage(src image.Image, scale int) image.Image {
+	sbo := src.Bounds()
+	dr := image.Rect(0, 0, sbo.Max.X*scale, sbo.Max.Y*scale)
+	dst := image.NewRGBA(dr)
+	draw.NearestNeighbor.Scale(dst, dr, src, sbo, draw.Over, nil)
+	return dst
+}
+
 func savePNG(img image.Image, filename string) {
 	fmt.Println("Saving image:", filename)
 	var buf bytes.Buffer
@@ -131,6 +142,8 @@ func main() {
 	layers := readLayers(imageFile)
 	finalLayer := mergeLayers(layers)
 	printImage(finalLayer, width, height)
+
 	img := makeImage(finalLayer)
-	savePNG(img, "image.png")
+	scaled := scaleImage(img, scale)
+	savePNG(scaled, fmt.Sprintf("image-%dx.png", scale))
 }
