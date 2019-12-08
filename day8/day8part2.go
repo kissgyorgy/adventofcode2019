@@ -19,7 +19,7 @@ const (
 	imageFile = "day8-input.txt"
 	width     = 25
 	height    = 6
-	scale     = 20
+	scale     = 2
 )
 
 type myColor int
@@ -86,19 +86,24 @@ func mergeLayers(layers [][]myColor) []myColor {
 	return image
 }
 
-func printImage(image []myColor, width, height int) {
-	for i, pix := range image {
-		if i%width == 0 && i != 0 {
+func printImage(img image.Image) {
+	bounds := img.Bounds()
+	pi := image.NewPaletted(bounds, []color.Color{
+		color.Gray{Y: 255},
+		color.Gray{Y: 160},
+		color.Gray{Y: 70},
+		color.Gray{Y: 35},
+		color.Gray{Y: 0},
+	})
+	draw.FloydSteinberg.Draw(pi, bounds, img, image.ZP)
+	shade := []string{" ", "░", "▒", "▓", "█"}
+
+	for i, p := range pi.Pix {
+		fmt.Print(shade[p])
+		if (i+1)%width == 0 {
 			fmt.Println()
 		}
-
-		if pix == black {
-			fmt.Printf(" ")
-		} else {
-			fmt.Printf("█")
-		}
 	}
-	fmt.Println()
 }
 
 func makeImage(img []myColor) image.Image {
@@ -133,9 +138,8 @@ func savePNG(img image.Image, filename string) {
 func main() {
 	layers := readLayers(imageFile)
 	finalLayer := mergeLayers(layers)
-	printImage(finalLayer, width, height)
-
 	img := makeImage(finalLayer)
+	printImage(img)
 	scaled := scaleImage(img, scale)
 	savePNG(scaled, fmt.Sprintf("image-%dx.png", scale))
 }
