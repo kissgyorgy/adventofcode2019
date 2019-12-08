@@ -87,7 +87,7 @@ func printImage(image []color, width, height int) {
 		if pix == black {
 			fmt.Printf(" ")
 		} else {
-			fmt.Printf("*")
+			fmt.Printf("█")
 		}
 	}
 	fmt.Println()
