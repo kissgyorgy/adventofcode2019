@@ -86,7 +86,7 @@ func mergeLayers(layers [][]myColor) []myColor {
 	return image
 }
 
-func printImage(img image.Image) {
+func printImage(img image.Image, width int) {
 	bounds := img.Bounds()
 	pi := image.NewPaletted(bounds, []color.Color{
 		color.Gray{Y: 255},
@@ -106,7 +106,7 @@ func printImage(img image.Image) {
 	}
 }
 
-func makeImage(img []myColor) image.Image {
+func makeImage(img []myColor, width, height int) image.Image {
 	m := image.NewNRGBA(image.Rect(0, 0, width, height))
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
@@ -138,8 +138,8 @@ func savePNG(img image.Image, filename string) {
 func main() {
 	layers := readLayers(imageFile)
 	finalLayer := mergeLayers(layers)
-	img := makeImage(finalLayer)
-	printImage(img)
+	img := makeImage(finalLayer, width, height)
+	printImage(img, width)
 	scaled := scaleImage(img, scale)
 	savePNG(scaled, fmt.Sprintf("image-%dx.png", scale))
 }
