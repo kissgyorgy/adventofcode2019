@@ -2,6 +2,7 @@ package intcode
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"os"
 )
@@ -18,7 +19,7 @@ func getNthDigitFromRight(num, ind int) int {
 	return num / int(math.Pow10(ind)) % 10
 }
 
-func getParam(memory []int, opAddr, nth int) int {
+func getParam(l *log.Logger, memory []int, opAddr, nth int) int {
 	var val int
 	mode := getNthDigitFromRight(memory[opAddr], nth+1)
 	switch paramMode(mode) {
@@ -31,7 +32,7 @@ func getParam(memory []int, opAddr, nth int) int {
 		fmt.Println("Invalid parameter mode:", mode)
 		os.Exit(1)
 	}
-	fmt.Printf("param%d: %v (addr: %d)\n", nth, val, opAddr+nth)
+	l.Printf("param%d: %v (addr: %d)\n", nth, val, opAddr+nth)
 	return val
 
 }
