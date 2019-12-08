@@ -13,7 +13,7 @@ func Load(filename string) []string {
 }
 
 func Init(input []string) []int {
-	memory := make([]int, len(input), len(input))
+	memory := make([]int, len(input))
 	for i, v := range input {
 		num, _ := strconv.ParseInt(v, 10, 0)
 		memory[i] = int(num)

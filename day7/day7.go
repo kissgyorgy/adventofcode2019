@@ -19,7 +19,7 @@ var (
 func main() {
 	code := intcode.Load(amplifierControllerSoftware)
 	initMemory := intcode.Init(code)
-	memory := make([]int, len(initMemory), len(initMemory))
+	memory := make([]int, len(initMemory))
 
 	var maxThrust float64 = 0
 

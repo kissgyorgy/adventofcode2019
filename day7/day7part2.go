@@ -17,7 +17,7 @@ var (
 )
 
 func copyMem(from []int) []int {
-	newMemory := make([]int, len(from), len(from))
+	newMemory := make([]int, len(from))
 	copy(newMemory, from)
 	return newMemory
 }

@@ -53,7 +53,7 @@ func loadProgram(filename string) []string {
 }
 
 func initMemory(input []string) []int {
-	memory := make([]int, len(input), len(input))
+	memory := make([]int, len(input))
 	for i, v := range input {
 		num, _ := strconv.ParseInt(v, 10, 0)
 		memory[i] = int(num)
@@ -65,7 +65,7 @@ func main() {
 	intcode := loadProgram("day2-input.txt")
 	initialMemory := initMemory(intcode)
 
-	memory := make([]int, len(intcode), len(intcode))
+	memory := make([]int, len(intcode))
 
 	for noun := 0; noun < 100; noun++ {
 		for verb := 0; verb < 100; verb++ {

@@ -27,18 +27,18 @@ func permutate(ch chan []int, numbers []int, r int) {
 		r = n
 	}
 
-	indices := make([]int, n, n)
+	indices := make([]int, n)
 	for i := 0; i < n; i++ {
 		indices[i] = i
 	}
 
-	cycles := make([]int, r, r)
+	cycles := make([]int, r)
 	for i := 0; i < r; i++ {
 		cycles[i] = n - i
 	}
 
 	nextPerm := func() []int {
-		perm := make([]int, r, r)
+		perm := make([]int, r)
 		for i, ind := range indices[:r] {
 			perm[i] = numbers[ind]
 		}
