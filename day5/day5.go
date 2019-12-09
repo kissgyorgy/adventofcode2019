@@ -17,5 +17,5 @@ func main() {
 	fmt.Println("Memory:", memory)
 	inputs, outputs := make(chan int, 1), make(chan int, 1)
 	inputs <- inputVal
-	intcode.Run(memory, inputs, outputs)
+	intcode.Run("day5", memory, inputs, outputs)
 }

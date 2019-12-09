@@ -6,6 +6,14 @@ import (
 	"os"
 )
 
+type computer struct {
+	memory       []int
+	relativeBase int
+	inputs       chan int
+	outputs      chan int
+	l            *log.Logger
+}
+
 type opCode int
 
 const (
@@ -21,58 +29,66 @@ const (
 	halt               opCode = 99
 )
 
-func Run(name string, memory []int, inputs, outputs chan int) {
+func new(name string, program []int, inputs, outputs chan int) *computer {
+	logPrefix := fmt.Sprintf("[%s] ", name)
+	mem := make([]int, len(program))
+	copy(mem, program)
+	return &computer{
+		memory:       mem,
+		relativeBase: 0,
+		inputs:       inputs,
+		outputs:      outputs,
+		l:            log.New(os.Stdout, logPrefix, 0),
+	}
+}
+
+func Run(name string, program []int, inputs, outputs chan int) {
+	c := new(name, program, inputs, outputs)
+
 	var op opCode
-	var param1, param2, respos int
-	prefix := fmt.Sprintf("[%s] ", name)
-	l := log.New(os.Stdout, prefix, 0)
-	relativeBase := 0
+	var param1, param2 int
 
 	for addr := 0; ; {
-		l.Printf("Instruction: %v\n", memory[addr])
-		l.Printf("Addr: %v\n", addr)
-		op = opCode(memory[addr] % 100)
+		instr := c.read(addr)
+		c.l.Printf("Instruction: %v <= [%v]\n", instr, addr)
+		op = opCode(instr % 100)
 		if op == halt {
 			close(outputs)
 			return
 		}
 
-		param1 = getParam(l, memory, relativeBase, addr, 1)
+		param1 = c.getParam(addr, 1)
 
 		switch op {
 		case add:
-			param2 = getParam(l, memory, relativeBase, addr, 2)
-			// Parameters that an instruction writes to will never be in immediate mode.
-			respos = memory[addr+3]
-			l.Printf("ADD: %d+%d => %d\n", param1, param2, respos)
-			memory[respos] = param1 + param2
+			param2 = c.getParam(addr, 2)
+			c.l.Printf("ADD: %d + %d", param1, param2)
+			c.write(addr+3, param1+param2)
 			addr += 4
 
 		case multiply:
-			param2 = getParam(l, memory, relativeBase, addr, 2)
+			param2 = c.getParam(addr, 2)
 			// Parameters that an instruction writes to will never be in immediate mode.
-			respos = memory[addr+3]
-			l.Printf("MUL: %d*%d => %d\n", param1, param2, respos)
-			memory[respos] = param1 * param2
+			c.l.Printf("MUL: %d*%d", param1, param2)
+			c.write(addr+3, param1*param2)
 			addr += 4
 
 		case input:
-			respos = memory[addr+1]
-			l.Printf("Waiting for INPUT: ? <= %d\n", respos)
+			c.l.Println("Waiting for INPUT")
 			in := <-inputs
-			l.Printf("Got INPUT: %d => %d\n", in, respos)
-			memory[respos] = in
+			c.l.Printf("Got INPUT: %d", in)
+			c.write(addr+1, in)
 			addr += 2
 
 		case output:
-			l.Printf("OUTPUT: %d \n", param1)
+			c.l.Printf("OUTPUT: %d \n", param1)
 			outputs <- param1
 			addr += 2
 
 		case jumpIfTrue:
 			if param1 != 0 {
-				param2 = getParam(l, memory, relativeBase, addr, 2)
-				l.Printf("JUMP: => %d\n", param2)
+				param2 = c.getParam(addr, 2)
+				c.l.Printf("JUMP: => %d\n", param2)
 				addr = param2
 			} else {
 				addr += 3
@@ -80,42 +96,40 @@ func Run(name string, memory []int, inputs, outputs chan int) {
 
 		case jumpIfFalse:
 			if param1 == 0 {
-				param2 = getParam(l, memory, relativeBase, addr, 2)
-				l.Printf("JUMP: => %d\n", param2)
+				param2 = c.getParam(addr, 2)
+				c.l.Printf("JUMP: => %d\n", param2)
 				addr = param2
 			} else {
 				addr += 3
 			}
 
 		case lessThan:
-			param2 = getParam(l, memory, relativeBase, addr, 2)
-			l.Println("LESSTHAN:", param1, param2)
-			respos = memory[addr+3]
+			param2 = c.getParam(addr, 2)
+			c.l.Println("LESSTHAN:", param1, param2)
 			if param1 < param2 {
-				memory[respos] = 1
+				c.write(addr+3, 1)
 			} else {
-				memory[respos] = 0
+				c.write(addr+3, 0)
 			}
 			addr += 4
 
 		case equals:
-			param2 = getParam(l, memory, relativeBase, addr, 2)
-			l.Println("EQUALS:", param1, param2)
-			respos = memory[addr+3]
+			param2 = c.getParam(addr, 2)
+			c.l.Println("EQUALS:", param1, param2)
 			if param1 == param2 {
-				memory[respos] = 1
+				c.write(addr+3, 1)
 			} else {
-				memory[respos] = 0
+				c.write(addr+3, 0)
 			}
 			addr += 4
 
 		case relativeBaseOffset:
-			relativeBase += param1
-			l.Printf("RELBASE: + %v = %v\n", param1, relativeBase)
+			c.relativeBase += param1
+			c.l.Printf("RELBASE + %v = %v\n", param1, c.relativeBase)
 			addr += 2
 
 		default:
-			l.Println("Invalid opcode:", op)
+			c.l.Println("Invalid opcode:", op)
 			os.Exit(1)
 		}
 	}
