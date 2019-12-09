@@ -9,15 +9,16 @@ import (
 type opCode int
 
 const (
-	add         opCode = 1
-	multiply    opCode = 2
-	input       opCode = 3
-	output      opCode = 4
-	jumpIfTrue  opCode = 5
-	jumpIfFalse opCode = 6
-	lessThan    opCode = 7
-	equals      opCode = 8
-	halt        opCode = 99
+	add                opCode = 1
+	multiply           opCode = 2
+	input              opCode = 3
+	output             opCode = 4
+	jumpIfTrue         opCode = 5
+	jumpIfFalse        opCode = 6
+	lessThan           opCode = 7
+	equals             opCode = 8
+	relativeBaseOffset opCode = 9
+	halt               opCode = 99
 )
 
 func Run(name string, memory []int, inputs, outputs chan int) {
@@ -25,6 +26,7 @@ func Run(name string, memory []int, inputs, outputs chan int) {
 	var param1, param2, respos int
 	prefix := fmt.Sprintf("[%s] ", name)
 	l := log.New(os.Stdout, prefix, 0)
+	relativeBase := 0
 
 	for addr := 0; ; {
 		l.Printf("Instruction: %v\n", memory[addr])
@@ -35,11 +37,11 @@ func Run(name string, memory []int, inputs, outputs chan int) {
 			return
 		}
 
-		param1 = getParam(l, memory, addr, 1)
+		param1 = getParam(l, memory, relativeBase, addr, 1)
 
 		switch op {
 		case add:
-			param2 = getParam(l, memory, addr, 2)
+			param2 = getParam(l, memory, relativeBase, addr, 2)
 			// Parameters that an instruction writes to will never be in immediate mode.
 			respos = memory[addr+3]
 			l.Printf("ADD: %d+%d => %d\n", param1, param2, respos)
@@ -47,7 +49,7 @@ func Run(name string, memory []int, inputs, outputs chan int) {
 			addr += 4
 
 		case multiply:
-			param2 = getParam(l, memory, addr, 2)
+			param2 = getParam(l, memory, relativeBase, addr, 2)
 			// Parameters that an instruction writes to will never be in immediate mode.
 			respos = memory[addr+3]
 			l.Printf("MUL: %d*%d => %d\n", param1, param2, respos)
@@ -69,7 +71,7 @@ func Run(name string, memory []int, inputs, outputs chan int) {
 
 		case jumpIfTrue:
 			if param1 != 0 {
-				param2 = getParam(l, memory, addr, 2)
+				param2 = getParam(l, memory, relativeBase, addr, 2)
 				l.Printf("JUMP: => %d\n", param2)
 				addr = param2
 			} else {
@@ -78,7 +80,7 @@ func Run(name string, memory []int, inputs, outputs chan int) {
 
 		case jumpIfFalse:
 			if param1 == 0 {
-				param2 = getParam(l, memory, addr, 2)
+				param2 = getParam(l, memory, relativeBase, addr, 2)
 				l.Printf("JUMP: => %d\n", param2)
 				addr = param2
 			} else {
@@ -86,7 +88,7 @@ func Run(name string, memory []int, inputs, outputs chan int) {
 			}
 
 		case lessThan:
-			param2 = getParam(l, memory, addr, 2)
+			param2 = getParam(l, memory, relativeBase, addr, 2)
 			l.Println("LESSTHAN:", param1, param2)
 			respos = memory[addr+3]
 			if param1 < param2 {
@@ -97,7 +99,7 @@ func Run(name string, memory []int, inputs, outputs chan int) {
 			addr += 4
 
 		case equals:
-			param2 = getParam(l, memory, addr, 2)
+			param2 = getParam(l, memory, relativeBase, addr, 2)
 			l.Println("EQUALS:", param1, param2)
 			respos = memory[addr+3]
 			if param1 == param2 {
@@ -106,6 +108,11 @@ func Run(name string, memory []int, inputs, outputs chan int) {
 				memory[respos] = 0
 			}
 			addr += 4
+
+		case relativeBaseOffset:
+			relativeBase += param1
+			l.Printf("RELBASE: + %v = %v\n", param1, relativeBase)
+			addr += 2
 
 		default:
 			l.Println("Invalid opcode:", op)
