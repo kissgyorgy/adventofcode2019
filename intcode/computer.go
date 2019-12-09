@@ -63,20 +63,20 @@ func Run(name string, program []int, inputs, outputs chan int) {
 		switch op {
 		case add:
 			c.l.Printf("ADD: %d + %d", param1, param2)
-			c.write(addr+3, param1+param2)
+			c.write(addr, 3, param1+param2)
 			addr += 4
 
 		case multiply:
 			// Parameters that an instruction writes to will never be in immediate mode.
 			c.l.Printf("MUL: %d*%d", param1, param2)
-			c.write(addr+3, param1*param2)
+			c.write(addr, 3, param1*param2)
 			addr += 4
 
 		case input:
 			c.l.Println("Waiting for INPUT")
 			in := <-inputs
 			c.l.Printf("Got INPUT: %d", in)
-			c.write(addr+1, in)
+			c.write(addr, 1, in)
 			addr += 2
 
 		case output:
@@ -103,18 +103,18 @@ func Run(name string, program []int, inputs, outputs chan int) {
 		case lessThan:
 			c.l.Println("LESSTHAN:", param1, param2)
 			if param1 < param2 {
-				c.write(addr+3, 1)
+				c.write(addr, 3, 1)
 			} else {
-				c.write(addr+3, 0)
+				c.write(addr, 3, 0)
 			}
 			addr += 4
 
 		case equals:
 			c.l.Println("EQUALS:", param1, param2)
 			if param1 == param2 {
-				c.write(addr+3, 1)
+				c.write(addr, 3, 1)
 			} else {
-				c.write(addr+3, 0)
+				c.write(addr, 3, 0)
 			}
 			addr += 4
 

@@ -27,9 +27,18 @@ func (c *computer) read(addr int) int {
 	return c.memory[addr]
 }
 
-func (c *computer) write(addr, value int) {
+func (c *computer) getParamMode(opAddr, nth int) paramMode {
+	digit := getNthDigitFromRight(c.read(opAddr), nth+1)
+	return paramMode(digit)
+}
+
+func (c *computer) write(opAddr, nth, value int) {
 	// Parameters that an instruction writes to will never be in immediate mode.
-	pos := c.read(addr)
+	pos := c.read(opAddr + nth)
+	if c.getParamMode(opAddr, nth) == relativeMode {
+		pos += c.relativeBase
+	}
+
 	c.l.Printf("    %d => [%d]", value, pos)
 	if pos > len(c.memory)-1 {
 		needed := pos + 1 - len(c.memory)
@@ -41,10 +50,10 @@ func (c *computer) write(addr, value int) {
 
 func (c *computer) getParam(opAddr, nth int) int {
 	var val int
-	mode := getNthDigitFromRight(c.read(opAddr), nth+1)
+	mode := c.getParamMode(opAddr, nth)
 	param := c.read(opAddr + nth)
 
-	switch paramMode(mode) {
+	switch mode {
 	case positionMode:
 		val = c.read(param)
 	case immediateMode:
