@@ -12,10 +12,9 @@ const (
 )
 
 func main() {
-	code := intcode.Load(intcodeFile)
-	memory := intcode.Init(code)
-	fmt.Println("Memory:", memory)
+	program := intcode.Load(intcodeFile)
+	fmt.Println("Program:", program)
 	inputs, outputs := make(chan int, 1), make(chan int, 1)
 	inputs <- inputVal
-	intcode.Run("day5", memory, inputs, outputs)
+	intcode.Run("day5", program, inputs, outputs)
 }

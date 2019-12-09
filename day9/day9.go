@@ -13,8 +13,7 @@ const (
 )
 
 func main() {
-	code := intcode.Load(boostCode)
-	program := intcode.Init(code)
+	program := intcode.Load(boostCode)
 
 	inputs, outputs := make(chan int, 1), make(chan int)
 	// inputs <- testMode

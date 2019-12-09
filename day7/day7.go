@@ -17,18 +17,17 @@ var (
 )
 
 func main() {
-	code := intcode.Load(amplifierControllerSoftware)
-	initMemory := intcode.Init(code)
-	memory := make([]int, len(initMemory))
+	program := intcode.Load(amplifierControllerSoftware)
+	memory := make([]int, len(program))
 
 	var maxThrust float64 = 0
 
 	for phase := range IterPermutations(phaseSettings, -1) {
 		fmt.Println("Phase settings:", phase)
-		copy(memory, initMemory)
+		copy(memory, program)
 		inputSignal := 0
 		for i, _ := range amplifiers {
-			outputs := intcode.Run(initMemory, phase[i], inputSignal)
+			outputs := intcode.Run(program, phase[i], inputSignal)
 			fmt.Println("Outputs:", outputs)
 			inputSignal = outputs[0]
 			maxThrust = math.Max(float64(outputs[0]), maxThrust)

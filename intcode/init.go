@@ -1,22 +1,25 @@
 package intcode
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
 )
 
-func Load(filename string) []string {
+func Load(filename string) []int {
 	content, _ := ioutil.ReadFile(filename)
 	stringContent := strings.TrimSpace(string(content))
-	return strings.Split(stringContent, ",")
-}
+	code := strings.Split(stringContent, ",")
 
-func Init(input []string) []int {
-	memory := make([]int, len(input))
-	for i, v := range input {
-		num, _ := strconv.ParseInt(v, 10, 0)
-		memory[i] = int(num)
+	program := make([]int, len(code))
+	for i, v := range code {
+		num, err := strconv.ParseInt(v, 10, 0)
+		if err != nil {
+			msg := fmt.Sprintf("Invalid Intcode instruction: %v", err)
+			panic(msg)
+		}
+		program[i] = int(num)
 	}
-	return memory
+	return program
 }

@@ -47,13 +47,11 @@ func getThrust(initMemory []int, currentSettings []int) int {
 }
 
 func main() {
-	code := intcode.Load(amplifierControllerSoftware)
-	initMemory := intcode.Init(code)
+	program := intcode.Load(amplifierControllerSoftware)
 
 	var maxThrust float64 = 0
-
 	for currentSettings := range IterPermutations(phaseSettings, -1) {
-		thrust := getThrust(initMemory, currentSettings)
+		thrust := getThrust(program, currentSettings)
 		maxThrust = math.Max(float64(thrust), maxThrust)
 	}
 	fmt.Printf("MAX thrust: %d\n", int(maxThrust))
