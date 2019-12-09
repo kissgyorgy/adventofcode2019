@@ -58,16 +58,15 @@ func Run(name string, program []int, inputs, outputs chan int) {
 		}
 
 		param1 = c.getParam(addr, 1)
+		param2 = c.getParam(addr, 2)
 
 		switch op {
 		case add:
-			param2 = c.getParam(addr, 2)
 			c.l.Printf("ADD: %d + %d", param1, param2)
 			c.write(addr+3, param1+param2)
 			addr += 4
 
 		case multiply:
-			param2 = c.getParam(addr, 2)
 			// Parameters that an instruction writes to will never be in immediate mode.
 			c.l.Printf("MUL: %d*%d", param1, param2)
 			c.write(addr+3, param1*param2)
@@ -87,7 +86,6 @@ func Run(name string, program []int, inputs, outputs chan int) {
 
 		case jumpIfTrue:
 			if param1 != 0 {
-				param2 = c.getParam(addr, 2)
 				c.l.Printf("JUMP: => %d\n", param2)
 				addr = param2
 			} else {
@@ -96,7 +94,6 @@ func Run(name string, program []int, inputs, outputs chan int) {
 
 		case jumpIfFalse:
 			if param1 == 0 {
-				param2 = c.getParam(addr, 2)
 				c.l.Printf("JUMP: => %d\n", param2)
 				addr = param2
 			} else {
@@ -104,7 +101,6 @@ func Run(name string, program []int, inputs, outputs chan int) {
 			}
 
 		case lessThan:
-			param2 = c.getParam(addr, 2)
 			c.l.Println("LESSTHAN:", param1, param2)
 			if param1 < param2 {
 				c.write(addr+3, 1)
@@ -114,7 +110,6 @@ func Run(name string, program []int, inputs, outputs chan int) {
 			addr += 4
 
 		case equals:
-			param2 = c.getParam(addr, 2)
 			c.l.Println("EQUALS:", param1, param2)
 			if param1 == param2 {
 				c.write(addr+3, 1)

@@ -20,6 +20,10 @@ func getNthDigitFromRight(num, ind int) int {
 }
 
 func (c *computer) read(addr int) int {
+	if addr > len(c.memory)-1 {
+		// we don't even need to expand memory at this point
+		return 0
+	}
 	return c.memory[addr]
 }
 
@@ -27,6 +31,11 @@ func (c *computer) write(addr, value int) {
 	// Parameters that an instruction writes to will never be in immediate mode.
 	pos := c.read(addr)
 	c.l.Printf("    %d => [%d]", value, pos)
+	if pos > len(c.memory)-1 {
+		needed := pos + 1 - len(c.memory)
+		extraMem := make([]int, needed)
+		c.memory = append(c.memory, extraMem...)
+	}
 	c.memory[pos] = value
 }
 
