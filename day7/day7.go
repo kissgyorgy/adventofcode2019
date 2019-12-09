@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"sync"
 
 	"github.com/kissgyorgy/adventofcode2019/intcode"
 )
@@ -16,27 +17,49 @@ var (
 	amplifiers    = []string{"A", "B", "C", "D", "E"}
 )
 
-func main() {
-	program := intcode.Load(amplifierControllerSoftware)
-	memory := make([]int, len(program))
+func runPhase(phase, program []int, results chan int) {
+	var out int
+	inputSignal := 0
+	for i, amp := range amplifiers {
+		inputs, outputs := make(chan int, 2), make(chan int)
+		inputs <- phase[i]
+		inputs <- inputSignal
+		go intcode.Run(amp, program, inputs, outputs)
+		out = <-outputs
+		fmt.Println("Output:", out)
+		inputSignal = out
+	}
+	results <- out
+}
 
-	var maxThrust float64 = 0
+func runSettingPermutations(program, phaseSettings []int, results chan int) {
+	var wg sync.WaitGroup
 
 	for phase := range IterPermutations(phaseSettings, -1) {
-		fmt.Println("Phase settings:", phase)
-		copy(memory, program)
-		inputSignal := 0
-
-		for i, amp := range amplifiers {
-			inputs, outputs := make(chan int, 2), make(chan int)
-			inputs <- phase[i]
-			inputs <- inputSignal
-			go intcode.Run(amp, program, inputs, outputs)
-			out := <-outputs
-			fmt.Println("Output:", out)
-			inputSignal = out
-			maxThrust = math.Max(float64(out), maxThrust)
-			fmt.Println("MaxThrust:", int(maxThrust))
-		}
+		go func(phase []int) {
+			wg.Add(1)
+			defer wg.Done()
+			fmt.Println("Running with phase settings:", phase)
+			runPhase(phase, program, results)
+		}(phase)
 	}
+
+	wg.Wait()
+	close(results)
+}
+
+func collectMaxThrustResults(results chan int) int {
+	var maxThrust float64 = 0
+	for res := range results {
+		maxThrust = math.Max(float64(res), maxThrust)
+	}
+	return int(maxThrust)
+}
+
+func main() {
+	program := intcode.Load(amplifierControllerSoftware)
+	results := make(chan int, 10)
+	go runSettingPermutations(program, phaseSettings, results)
+	maxThrust := collectMaxThrustResults(results)
+	fmt.Println("Result:", maxThrust)
 }
