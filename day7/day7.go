@@ -26,11 +26,16 @@ func main() {
 		fmt.Println("Phase settings:", phase)
 		copy(memory, program)
 		inputSignal := 0
-		for i, _ := range amplifiers {
-			outputs := intcode.Run(program, phase[i], inputSignal)
-			fmt.Println("Outputs:", outputs)
-			inputSignal = outputs[0]
-			maxThrust = math.Max(float64(outputs[0]), maxThrust)
+
+		for i, amp := range amplifiers {
+			inputs, outputs := make(chan int, 2), make(chan int)
+			inputs <- phase[i]
+			inputs <- inputSignal
+			go intcode.Run(amp, program, inputs, outputs)
+			out := <-outputs
+			fmt.Println("Output:", out)
+			inputSignal = out
+			maxThrust = math.Max(float64(out), maxThrust)
 			fmt.Println("MaxThrust:", int(maxThrust))
 		}
 	}
