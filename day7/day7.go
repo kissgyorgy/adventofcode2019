@@ -36,8 +36,8 @@ func runSettingPermutations(program, phaseSettings []int, results chan int) {
 	var wg sync.WaitGroup
 
 	for phase := range IterPermutations(phaseSettings, -1) {
+		wg.Add(1)
 		go func(phase []int) {
-			wg.Add(1)
 			defer wg.Done()
 			fmt.Println("Running with phase settings:", phase)
 			runPhase(phase, program, results)
