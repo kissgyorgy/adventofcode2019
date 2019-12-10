@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/kissgyorgy/adventofcode2019/intcode"
+	"github.com/kissgyorgy/adventofcode2019/itertools"
 )
 
 const (
@@ -35,7 +36,7 @@ func runPhase(phase, program []int, results chan<- int) {
 func runSettingPermutations(program, phaseSettings []int, results chan<- int) {
 	var wg sync.WaitGroup
 
-	for phase := range IterPermutations(phaseSettings, -1) {
+	for phase := range itertools.Permutations(phaseSettings, -1) {
 		wg.Add(1)
 		go func(phase []int) {
 			defer wg.Done()

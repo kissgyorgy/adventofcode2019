@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/kissgyorgy/adventofcode2019/intcode"
+	"github.com/kissgyorgy/adventofcode2019/itertools"
 )
 
 const (
@@ -50,7 +51,7 @@ func main() {
 	program := intcode.Load(amplifierControllerSoftware)
 
 	var maxThrust float64 = 0
-	for currentSettings := range IterPermutations(phaseSettings, -1) {
+	for currentSettings := range itertools.Permutations(phaseSettings, -1) {
 		thrust := getThrust(program, currentSettings)
 		maxThrust = math.Max(float64(thrust), maxThrust)
 	}

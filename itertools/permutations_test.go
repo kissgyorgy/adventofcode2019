@@ -1,4 +1,4 @@
-package main
+package itertools
 
 import (
 	"fmt"
@@ -69,7 +69,7 @@ func TestPermutations(t *testing.T) {
 		desc := fmt.Sprintf("%v,%d", tt.seq, tt.r)
 		t.Run(desc, func(t *testing.T) {
 			allPermutations := make([][]int, 0, len(tt.expected))
-			for perm := range IterPermutations(tt.seq, tt.r) {
+			for perm := range Permutations(tt.seq, tt.r) {
 				allPermutations = append(allPermutations, perm)
 			}
 			assert.Equal(t, tt.expected, allPermutations)

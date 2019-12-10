@@ -1,10 +1,10 @@
-package main
+package itertools
 
 import (
 	"errors"
 )
 
-func IterPermutations(numbers []int, r int) <-chan []int {
+func Permutations(numbers []int, r int) <-chan []int {
 	if r > len(numbers) {
 		err := errors.New("r cannot be bigger than the length of numbers")
 		panic(err)
