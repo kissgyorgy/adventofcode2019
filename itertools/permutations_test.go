@@ -9,66 +9,66 @@ import (
 
 func TestPermutations(t *testing.T) {
 	tests := []struct {
-		seq      []int
+		seq      []interface{}
 		r        int
-		expected [][]int
+		expected [][]interface{}
 	}{
 		{
-			seq:      []int{},
+			seq:      []interface{}{},
 			r:        -1,
-			expected: [][]int{[]int{}},
+			expected: [][]interface{}{[]interface{}{}},
 		},
 		{
-			seq:      []int{42},
+			seq:      []interface{}{42},
 			r:        -1,
-			expected: [][]int{[]int{42}},
+			expected: [][]interface{}{[]interface{}{42}},
 		},
 		{
-			seq:      []int{42},
+			seq:      []interface{}{42},
 			r:        1,
-			expected: [][]int{[]int{42}},
+			expected: [][]interface{}{[]interface{}{42}},
 		},
 		{
-			seq: []int{5, 6, 7},
+			seq: []interface{}{5, 6, 7},
 			r:   -1,
-			expected: [][]int{
-				[]int{5, 6, 7},
-				[]int{5, 7, 6},
-				[]int{6, 5, 7},
-				[]int{6, 7, 5},
-				[]int{7, 5, 6},
-				[]int{7, 6, 5},
+			expected: [][]interface{}{
+				[]interface{}{5, 6, 7},
+				[]interface{}{5, 7, 6},
+				[]interface{}{6, 5, 7},
+				[]interface{}{6, 7, 5},
+				[]interface{}{7, 5, 6},
+				[]interface{}{7, 6, 5},
 			},
 		},
 		{
-			seq: []int{5, 6, 7},
+			seq: []interface{}{5, 6, 7},
 			r:   3,
-			expected: [][]int{
-				[]int{5, 6, 7},
-				[]int{5, 7, 6},
-				[]int{6, 5, 7},
-				[]int{6, 7, 5},
-				[]int{7, 5, 6},
-				[]int{7, 6, 5},
+			expected: [][]interface{}{
+				[]interface{}{5, 6, 7},
+				[]interface{}{5, 7, 6},
+				[]interface{}{6, 5, 7},
+				[]interface{}{6, 7, 5},
+				[]interface{}{7, 5, 6},
+				[]interface{}{7, 6, 5},
 			},
 		},
 		{
-			seq: []int{5, 6, 7},
+			seq: []interface{}{5, 6, 7},
 			r:   2,
-			expected: [][]int{
-				[]int{5, 6},
-				[]int{5, 7},
-				[]int{6, 5},
-				[]int{6, 7},
-				[]int{7, 5},
-				[]int{7, 6},
+			expected: [][]interface{}{
+				[]interface{}{5, 6},
+				[]interface{}{5, 7},
+				[]interface{}{6, 5},
+				[]interface{}{6, 7},
+				[]interface{}{7, 5},
+				[]interface{}{7, 6},
 			},
 		},
 	}
 	for _, tt := range tests {
 		desc := fmt.Sprintf("%v,%d", tt.seq, tt.r)
 		t.Run(desc, func(t *testing.T) {
-			allPermutations := make([][]int, 0, len(tt.expected))
+			allPermutations := make([][]interface{}, 0, len(tt.expected))
 			for perm := range Permutations(tt.seq, tt.r) {
 				allPermutations = append(allPermutations, perm)
 			}

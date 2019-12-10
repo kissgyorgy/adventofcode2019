@@ -33,16 +33,32 @@ func runPhase(phase, program []int, results chan<- int) {
 	results <- out
 }
 
+func convert(numbers []int) []interface{} {
+	ifs := make([]interface{}, len(numbers))
+	for i, num := range numbers {
+		ifs[i] = interface{}(num)
+	}
+	return ifs
+}
+
+func convertBack(ifs []interface{}) []int {
+	numbers := make([]int, len(ifs))
+	for i, num := range numbers {
+		numbers[i] = int(num)
+	}
+	return numbers
+}
+
 func runSettingPermutations(program, phaseSettings []int, results chan<- int) {
 	var wg sync.WaitGroup
 
-	for phase := range itertools.Permutations(phaseSettings, -1) {
+	for phase := range itertools.Permutations(convert(phaseSettings), -1) {
 		wg.Add(1)
 		go func(phase []int) {
 			defer wg.Done()
 			fmt.Println("Running with phase settings:", phase)
 			runPhase(phase, program, results)
-		}(phase)
+		}(convertBack(phase))
 	}
 
 	wg.Wait()

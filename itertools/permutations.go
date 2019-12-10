@@ -4,24 +4,24 @@ import (
 	"errors"
 )
 
-func Permutations(numbers []int, r int) <-chan []int {
-	if r > len(numbers) {
+func Permutations(elements []interface{}, r int) <-chan []interface{} {
+	if r > len(elements) {
 		err := errors.New("r cannot be bigger than the length of numbers")
 		panic(err)
 	}
 
-	ch := make(chan []int)
+	ch := make(chan []interface{})
 	go func() {
 		defer close(ch)
-		permutate(ch, numbers, r)
+		permutate(ch, elements, r)
 	}()
 	return ch
 }
 
 // an implementation similar to Python standard library itertools.permutations:
 // https://docs.python.org/3.8/library/itertools.html#itertools.permutations
-func permutate(ch chan<- []int, numbers []int, r int) {
-	n := len(numbers)
+func permutate(ch chan<- []interface{}, elements []interface{}, r int) {
+	n := len(elements)
 
 	if r < 0 {
 		r = n
@@ -37,10 +37,10 @@ func permutate(ch chan<- []int, numbers []int, r int) {
 		cycles[i] = n - i
 	}
 
-	nextPerm := func() []int {
-		perm := make([]int, r)
+	nextPerm := func() []interface{} {
+		perm := make([]interface{}, r)
 		for i, ind := range indices[:r] {
-			perm[i] = numbers[ind]
+			perm[i] = elements[ind]
 		}
 		return perm
 	}
