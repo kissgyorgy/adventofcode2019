@@ -1,8 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math"
+	"os"
+)
+
+const (
+	mapFile = "day10-example1.txt"
 )
 
 type Point struct {
@@ -11,6 +17,31 @@ type Point struct {
 
 func (p Point) String() string {
 	return fmt.Sprintf("(%v,%v)", p.x, p.y)
+}
+
+func loadMap(mapFile string) [][]byte {
+	file, _ := os.Open(mapFile)
+	defer file.Close()
+
+	mapLines := make([][]byte, 0, 10)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		mapLines = append(mapLines, scanner.Bytes())
+	}
+	return mapLines
+}
+
+func convertToPoints(mapLines [][]byte) []Point {
+	points := make([]Point, 0, 100)
+	for y, line := range loadMap(mapFile) {
+		for x, char := range line {
+			if char == '#' {
+				p := Point{x, y}
+				points = append(points, p)
+			}
+		}
+	}
+	return points
 }
 
 func crossProduct(p1, p2, p3 Point) int {
@@ -53,5 +84,9 @@ func (p Point) isBetweenTwoPoints(p1, p2 Point) bool {
 }
 
 func main() {
-
+	asteroidMap := loadMap(mapFile)
+	for _, line := range asteroidMap {
+		fmt.Println(string(line))
+	}
+	fmt.Println(convertToPoints(asteroidMap))
 }
