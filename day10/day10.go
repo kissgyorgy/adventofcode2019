@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	mapFile = "day10-example1.txt"
+	mapFile = "day10-input.txt"
 )
 
 type Point struct {
@@ -31,7 +31,7 @@ func loadMap(mapFile string) [][]byte {
 	return mapLines
 }
 
-func convertToPoints(mapLines [][]byte) []Point {
+func convertMapToPoints(mapLines [][]byte) []Point {
 	points := make([]Point, 0, 100)
 	for y, line := range loadMap(mapFile) {
 		for x, char := range line {
@@ -83,10 +83,43 @@ func (p Point) isBetweenTwoPoints(p1, p2 Point) bool {
 	}
 }
 
+func isAPointBetween(p1 Point, points []Point, p2 Point) bool {
+	for _, middle := range points {
+		if middle == p1 || middle == p2 {
+			continue
+		}
+		if middle.isBetweenTwoPoints(p1, p2) {
+			return true
+		}
+	}
+	return false
+}
+
 func main() {
 	asteroidMap := loadMap(mapFile)
-	for _, line := range asteroidMap {
-		fmt.Println(string(line))
+	asteroidCoords := convertMapToPoints(asteroidMap)
+	fmt.Println(asteroidCoords)
+
+	detectableAstroids := make(map[Point]int)
+
+	for _, p1 := range asteroidCoords {
+		for _, p2 := range asteroidCoords {
+			if p1 == p2 {
+				continue
+			}
+			if !isAPointBetween(p1, asteroidCoords, p2) {
+				detectableAstroids[p1]++
+			}
+		}
 	}
-	fmt.Println(convertToPoints(asteroidMap))
+
+	maxAsteroids := 0
+	for _, p := range asteroidCoords {
+		count := detectableAstroids[p]
+		fmt.Println(p, count)
+		if count > maxAsteroids {
+			maxAsteroids = count
+		}
+	}
+	fmt.Println("Result:", maxAsteroids)
 }
