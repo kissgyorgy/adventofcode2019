@@ -102,13 +102,15 @@ func main() {
 
 	detectableAstroids := make(map[Point]int)
 
-	for _, p1 := range asteroidCoords {
-		for _, p2 := range asteroidCoords {
+	for i, p1 := range asteroidCoords {
+		for j := i + 1; j < len(asteroidCoords); j++ {
+			p2 := asteroidCoords[j]
 			if p1 == p2 {
 				continue
 			}
 			if !isAPointBetween(p1, asteroidCoords, p2) {
 				detectableAstroids[p1]++
+				detectableAstroids[p2]++
 			}
 		}
 	}
