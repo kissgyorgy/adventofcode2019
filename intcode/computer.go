@@ -9,8 +9,8 @@ import (
 type computer struct {
 	memory       []int
 	relativeBase int
-	inputs       chan int
-	outputs      chan int
+	inputs       <-chan int
+	outputs      chan<- int
 	l            *log.Logger
 }
 
@@ -29,7 +29,7 @@ const (
 	halt               opCode = 99
 )
 
-func new(name string, program []int, inputs, outputs chan int) *computer {
+func new(name string, program []int, inputs <-chan int, outputs chan<- int) *computer {
 	logPrefix := fmt.Sprintf("[%s] ", name)
 	mem := make([]int, len(program))
 	copy(mem, program)
@@ -42,7 +42,7 @@ func new(name string, program []int, inputs, outputs chan int) *computer {
 	}
 }
 
-func Run(name string, program []int, inputs, outputs chan int) {
+func Run(name string, program []int, inputs <-chan int, outputs chan<- int) {
 	c := new(name, program, inputs, outputs)
 
 	var op opCode

@@ -20,7 +20,7 @@ func IterPermutations(numbers []int, r int) <-chan []int {
 
 // an implementation similar to Python standard library itertools.permutations:
 // https://docs.python.org/3.8/library/itertools.html#itertools.permutations
-func permutate(ch chan []int, numbers []int, r int) {
+func permutate(ch chan<- []int, numbers []int, r int) {
 	n := len(numbers)
 
 	if r < 0 {

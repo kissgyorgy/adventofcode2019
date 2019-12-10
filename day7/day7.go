@@ -17,7 +17,7 @@ var (
 	amplifiers    = []string{"A", "B", "C", "D", "E"}
 )
 
-func runPhase(phase, program []int, results chan int) {
+func runPhase(phase, program []int, results chan<- int) {
 	var out int
 	inputSignal := 0
 	for i, amp := range amplifiers {
@@ -32,7 +32,7 @@ func runPhase(phase, program []int, results chan int) {
 	results <- out
 }
 
-func runSettingPermutations(program, phaseSettings []int, results chan int) {
+func runSettingPermutations(program, phaseSettings []int, results chan<- int) {
 	var wg sync.WaitGroup
 
 	for phase := range IterPermutations(phaseSettings, -1) {
@@ -48,7 +48,7 @@ func runSettingPermutations(program, phaseSettings []int, results chan int) {
 	close(results)
 }
 
-func collectMaxThrustResults(results chan int) int {
+func collectMaxThrustResults(results <-chan int) int {
 	var maxThrust float64 = 0
 	for res := range results {
 		maxThrust = math.Max(float64(res), maxThrust)
