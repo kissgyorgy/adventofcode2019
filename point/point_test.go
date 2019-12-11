@@ -1,4 +1,4 @@
-package main
+package point
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ func TestAreOnTheSameLine(t *testing.T) {
 	for _, tt := range tests {
 		desc := fmt.Sprintf("--%s--%s--%s--", tt.p1, tt.p2, tt.p3)
 		t.Run(desc, func(t *testing.T) {
-			assert.True(t, areOnTheSameLine(tt.p1, tt.p2, tt.p3))
+			assert.True(t, AreOnTheSameLine(tt.p1, tt.p2, tt.p3))
 		})
 	}
 }
@@ -49,7 +49,7 @@ func TestIsBetweenTwoPoints(t *testing.T) {
 	for _, tt := range tests {
 		desc := fmt.Sprintf("%s-->%s-->%s", tt.first, tt.middle, tt.last)
 		t.Run(desc, func(t *testing.T) {
-			assert.True(t, tt.middle.isBetweenTwoPoints(tt.first, tt.last))
+			assert.True(t, tt.middle.IsBetweenTwoPoints(tt.first, tt.last))
 		})
 	}
 }
