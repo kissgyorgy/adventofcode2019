@@ -29,7 +29,7 @@ func convertMapToPoints(mapLines [][]byte) []point.Point {
 	for y, line := range loadMap(mapFile) {
 		for x, char := range line {
 			if char == '#' {
-				p := point.Point{x, y}
+				p := point.Point{X: x, Y: y}
 				points = append(points, p)
 			}
 		}
