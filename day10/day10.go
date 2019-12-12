@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 
 	"github.com/kissgyorgy/adventofcode2019/point"
 )
@@ -11,31 +9,6 @@ import (
 const (
 	mapFile = "day10-input.txt"
 )
-
-func loadMap(mapFile string) [][]byte {
-	file, _ := os.Open(mapFile)
-	defer file.Close()
-
-	mapLines := make([][]byte, 0, 10)
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		mapLines = append(mapLines, scanner.Bytes())
-	}
-	return mapLines
-}
-
-func convertMapToPoints(mapLines [][]byte) []point.Point {
-	points := make([]point.Point, 0, 100)
-	for y, line := range loadMap(mapFile) {
-		for x, char := range line {
-			if char == '#' {
-				p := point.Point{X: x, Y: y}
-				points = append(points, p)
-			}
-		}
-	}
-	return points
-}
 
 func isAPointBetween(p1 point.Point, points []point.Point, p2 point.Point) bool {
 	for _, middle := range points {
