@@ -31,15 +31,15 @@ func main() {
 	inputs, outputs := make(chan int, 1), make(chan int)
 	go intcode.Run("painting robot", program, inputs, outputs)
 
-	spaceCraftSide := make(map[point.Point][]color)
+	spaceCraftSide := make(map[point.Point]color)
 
 	currentDirection := up
 	currentPoint := point.Point{X: 0, Y: 0}
 
 	for {
-		if panelColors, ok := spaceCraftSide[currentPoint]; ok {
+		if panelColor, ok := spaceCraftSide[currentPoint]; ok {
 			// send the last painted (current) color
-			inputs <- int(panelColors[len(panelColors)-1])
+			inputs <- int(panelColor)
 		} else {
 			// every panel is black initially
 			inputs <- int(black)
@@ -52,7 +52,7 @@ func main() {
 
 		// we need to know the fact "at least once" painted on white
 		// we could miss this information if later one panel is overpainted
-		spaceCraftSide[currentPoint] = append(spaceCraftSide[currentPoint], color(paintColorInt))
+		spaceCraftSide[currentPoint] = color(paintColorInt)
 
 		nextDirection := direction(<-outputs)
 		if nextDirection == left {
