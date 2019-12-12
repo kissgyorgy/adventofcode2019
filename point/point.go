@@ -2,14 +2,35 @@ package point
 
 import (
 	"fmt"
+	"math"
 )
 
 type Point struct {
 	X, Y int
 }
 
+type Rad float64
+
 func (p Point) String() string {
 	return fmt.Sprintf("(%v,%v)", p.X, p.Y)
+}
+
+func (p Point) Minus(p2 Point) Point {
+	return Point{p.X - p2.X, p.Y - p2.Y}
+}
+
+func DotProduct(p1, p2 Point) float64 {
+	return float64(p1.X*p2.X + p1.Y*p2.Y)
+}
+
+func (p Point) Length() float64 {
+	dotProdSelf := float64(DotProduct(p, p))
+	return math.Sqrt(dotProdSelf)
+}
+
+func Angle(p1, p2 Point) Rad {
+	cosAng := DotProduct(p1, p2) / (p1.Length() * p2.Length())
+	return Rad(math.Acos(cosAng))
 }
 
 func CrossProduct(p1, p2, p3 Point) int {

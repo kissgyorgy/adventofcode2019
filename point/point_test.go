@@ -2,6 +2,7 @@ package point
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -50,6 +51,26 @@ func TestIsBetweenTwoPoints(t *testing.T) {
 		desc := fmt.Sprintf("%s-->%s-->%s", tt.first, tt.middle, tt.last)
 		t.Run(desc, func(t *testing.T) {
 			assert.True(t, tt.middle.IsBetweenTwoPoints(tt.first, tt.last))
+		})
+	}
+}
+
+func TestAngle(t *testing.T) {
+	tests := []struct {
+		p1, p2   Point
+		expected Rad
+	}{
+		{p1, p1, Rad(0)},
+		{p1, p5, Rad(0)},
+		{Point{0, 1}, Point{1, 0}, Rad(math.Pi / 2)},
+		{Point{0, 1}, Point{0, -1}, Rad(math.Pi)},
+		{Point{1, 0}, Point{-1, 0}, Rad(math.Pi)},
+	}
+
+	for _, tt := range tests {
+		desc := fmt.Sprintf("%s, %s", tt.p1, tt.p2)
+		t.Run(desc, func(t *testing.T) {
+			assert.Equal(t, tt.expected, Angle(tt.p1, tt.p2))
 		})
 	}
 }
