@@ -43,12 +43,16 @@ func main() {
 	}
 
 	maxAsteroids := 0
+	maxAsteroidPoint := point.Point{}
+
 	for _, p := range asteroidCoords {
 		count := detectableAstroids[p]
 		fmt.Println(p, count)
 		if count > maxAsteroids {
 			maxAsteroids = count
+			maxAsteroidPoint = p
 		}
 	}
+	fmt.Println("Point with most asteroids:", maxAsteroidPoint)
 	fmt.Println("Result:", maxAsteroids)
 }
