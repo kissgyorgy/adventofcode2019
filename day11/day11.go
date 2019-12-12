@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	spaceCraftSide := paintSpaceShip()
+	spaceCraftSide := paintSpaceShip(black)
 	fmt.Println("Result:", len(spaceCraftSide))
 }

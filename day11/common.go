@@ -9,11 +9,11 @@ const (
 	robotProgram = "day11-input.txt"
 )
 
-type color int
+type myColor int
 
 const (
-	black color = 0
-	white color = 1
+	black myColor = 0
+	white myColor = 1
 )
 
 type direction int
@@ -25,15 +25,16 @@ const (
 	down  direction = 4
 )
 
-func paintSpaceShip() map[point.Point]color {
+func paintSpaceShip(startingPoint myColor) map[point.Point]myColor {
 	program := intcode.Load(robotProgram)
 	inputs, outputs := make(chan int, 1), make(chan int)
 	go intcode.Run("painting robot", program, inputs, outputs)
 
-	spaceCraftSide := make(map[point.Point]color)
+	spaceCraftSide := make(map[point.Point]myColor)
 
 	currentDirection := up
 	currentPoint := point.Point{X: 0, Y: 0}
+	spaceCraftSide[currentPoint] = startingPoint
 
 	for {
 		if panelColor, ok := spaceCraftSide[currentPoint]; ok {
@@ -51,7 +52,7 @@ func paintSpaceShip() map[point.Point]color {
 
 		// we need to know the fact "at least once" painted on white
 		// we could miss this information if later one panel is overpainted
-		spaceCraftSide[currentPoint] = color(paintColorInt)
+		spaceCraftSide[currentPoint] = myColor(paintColorInt)
 
 		nextDirection := direction(<-outputs)
 		if nextDirection == left {
