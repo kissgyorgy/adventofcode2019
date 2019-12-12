@@ -1,18 +1,15 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"image"
 	"image/color"
-	"image/png"
 	"io"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 
-	"golang.org/x/image/draw"
+	"github.com/kissgyorgy/adventofcode2019/aocimage"
 )
 
 const (
@@ -86,26 +83,6 @@ func mergeLayers(layers [][]myColor) []myColor {
 	return image
 }
 
-func printImage(img image.Image, width int) {
-	bounds := img.Bounds()
-	pi := image.NewPaletted(bounds, []color.Color{
-		color.Gray{Y: 255},
-		color.Gray{Y: 160},
-		color.Gray{Y: 70},
-		color.Gray{Y: 35},
-		color.Gray{Y: 0},
-	})
-	draw.FloydSteinberg.Draw(pi, bounds, img, image.ZP)
-	shade := []string{" ", "░", "▒", "▓", "█"}
-
-	for i, p := range pi.Pix {
-		fmt.Print(shade[p])
-		if (i+1)%width == 0 {
-			fmt.Println()
-		}
-	}
-}
-
 func makeImage(img []myColor, width, height int) image.Image {
 	m := image.NewNRGBA(image.Rect(0, 0, width, height))
 	for y := 0; y < height; y++ {
@@ -118,28 +95,11 @@ func makeImage(img []myColor, width, height int) image.Image {
 	return m
 }
 
-func scaleImage(src image.Image, scale int) image.Image {
-	sbo := src.Bounds()
-	dr := image.Rect(0, 0, sbo.Max.X*scale, sbo.Max.Y*scale)
-	dst := image.NewRGBA(dr)
-	draw.NearestNeighbor.Scale(dst, dr, src, sbo, draw.Over, nil)
-	return dst
-}
-
-func savePNG(img image.Image, filename string) {
-	fmt.Println("Saving image:", filename)
-	var buf bytes.Buffer
-	if err := png.Encode(&buf, img); err != nil {
-		panic(err)
-	}
-	ioutil.WriteFile(filename, buf.Bytes(), 0644)
-}
-
 func main() {
 	layers := readLayers(imageFile)
 	finalLayer := mergeLayers(layers)
 	img := makeImage(finalLayer, width, height)
-	printImage(img, width)
-	scaled := scaleImage(img, scale)
-	savePNG(scaled, fmt.Sprintf("image-%dx.png", scale))
+	aocimage.Print(img)
+	scaled := aocimage.Scale(img, scale)
+	aocimage.SavePNG(scaled, fmt.Sprintf("image-%dx.png", scale))
 }
