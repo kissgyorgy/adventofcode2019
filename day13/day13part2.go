@@ -13,7 +13,9 @@ const (
 	arcadeGameFile = "day13-input.txt"
 	playForFree    = 2
 	blackCell      = tcell.Style(tcell.ColorBlack)
-	animationSpeed = 50 * time.Millisecond
+	defaultSpeed   = 50 * time.Millisecond
+	width          = 44
+	speedEnd       = width - 3
 )
 
 type tileId int
@@ -53,7 +55,7 @@ func initScreen() tcell.Screen {
 	return s
 }
 
-func pollEvents(s tcell.Screen, keys chan<- tcell.Key, quit chan<- bool) {
+func pollEvents(s tcell.Screen, keys chan<- rune, quit chan<- bool) {
 	for {
 		ev := s.PollEvent()
 		switch ev := ev.(type) {
@@ -64,8 +66,8 @@ func pollEvents(s tcell.Screen, keys chan<- tcell.Key, quit chan<- bool) {
 				return
 			case tcell.KeyCtrlL:
 				s.Sync()
-			case tcell.KeyLeft, tcell.KeyRight, tcell.KeyUp:
-				keys <- ev.Key()
+			case tcell.KeyRune:
+				keys <- ev.Rune()
 			}
 		case *tcell.EventResize:
 			s.Sync()
@@ -74,6 +76,9 @@ func pollEvents(s tcell.Screen, keys chan<- tcell.Key, quit chan<- bool) {
 }
 
 func getDigits(num int) string {
+	if num == 0 {
+		return "0"
+	}
 	digits := ""
 	for num > 0 {
 		digit := num % 10
@@ -84,17 +89,35 @@ func getDigits(num int) string {
 	return digits
 }
 
-func runGame(s tcell.Screen, inputs chan<- int, outputs <-chan int, keyPress <-chan tcell.Key, quit <-chan bool) {
+func drawSleep(s tcell.Screen, speed time.Duration) {
+	// clear it first
+	for i := speedEnd; i < width; i++ {
+		s.SetContent(i, 0, ' ', nil, blackCell)
+	}
+	for i, digit := range getDigits(int(speed / time.Millisecond)) {
+		s.SetContent(speedEnd+i, 0, digit, nil, blackCell)
+	}
+}
+
+func runGame(s tcell.Screen, inputs chan<- int, outputs <-chan int, keys <-chan rune, quit <-chan bool) {
 	var ok bool
 	var x, y, obj int
 	var paddleX int
 	var tid tileId
+	var k rune
 
 	scoreEnd := len("Score: ")
+	speed := defaultSpeed
 
 	for x, c := range "Score: " {
 		s.SetContent(x, 0, c, nil, blackCell)
 	}
+
+	for x, c := range "Sleep: " {
+		s.SetContent(speedEnd-(len("Sleep: ")-x), 0, c, nil, blackCell)
+	}
+
+	drawSleep(s, speed)
 
 	for {
 		select {
@@ -126,8 +149,21 @@ func runGame(s tcell.Screen, inputs chan<- int, outputs <-chan int, keyPress <-c
 				} else {
 					inputs <- paddleStay
 				}
-				time.Sleep(animationSpeed)
 			}
+
+			time.Sleep(speed)
+
+		case k = <-keys:
+			switch k {
+			case '+':
+				speed += 10 * time.Millisecond
+			case '-':
+				speed -= 10 * time.Millisecond
+			}
+			if speed < 0*time.Millisecond {
+				speed = 0 * time.Millisecond
+			}
+			drawSleep(s, speed)
 
 		case <-quit:
 			return
@@ -139,15 +175,15 @@ func main() {
 	program := intcode.Load(arcadeGameFile)
 	inputs, outputs := make(chan int, 1), make(chan int)
 	program[0] = playForFree
-	go intcode.Run("Arcade", program, inputs, outputs)
+	go intcode.Run("Arcade", program, inputs, outputs, intcode.Silent)
 
 	s := initScreen()
 	quit := make(chan bool)
-	keyPress := make(chan tcell.Key)
+	keys := make(chan rune)
 
-	go pollEvents(s, keyPress, quit)
+	go pollEvents(s, keys, quit)
 
-	runGame(s, inputs, outputs, keyPress, quit)
+	runGame(s, inputs, outputs, keys, quit)
 	fmt.Println("Press any key to quit")
 	s.PollEvent()
 	s.Fini()
