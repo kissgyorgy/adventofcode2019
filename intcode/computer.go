@@ -2,9 +2,12 @@ package intcode
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 )
+
+const Silent = true
 
 type computer struct {
 	memory       []int
@@ -29,21 +32,37 @@ const (
 	halt               opCode = 99
 )
 
-func new(name string, program []int, inputs <-chan int, outputs chan<- int) *computer {
+func new(name string, program []int, inputs <-chan int, outputs chan<- int, quiet bool) *computer {
 	logPrefix := fmt.Sprintf("[%s] ", name)
 	mem := make([]int, len(program))
 	copy(mem, program)
+
+	logger := log.New(os.Stdout, logPrefix, 0)
+	if quiet {
+		logger.SetOutput(ioutil.Discard)
+	}
+
 	return &computer{
 		memory:       mem,
 		relativeBase: 0,
 		inputs:       inputs,
 		outputs:      outputs,
-		l:            log.New(os.Stdout, logPrefix, 0),
+		l:            logger,
 	}
 }
 
-func Run(name string, program []int, inputs <-chan int, outputs chan<- int) {
-	c := new(name, program, inputs, outputs)
+func getQuiet(quiet []bool) bool {
+	q := false
+	if len(quiet) == 1 {
+		q = quiet[0]
+	} else if len(quiet) > 1 {
+		panic("Invalid function call")
+	}
+	return q
+}
+
+func Run(name string, program []int, inputs <-chan int, outputs chan<- int, quiet ...bool) {
+	c := new(name, program, inputs, outputs, getQuiet(quiet))
 
 	var op opCode
 	var param1, param2 int
