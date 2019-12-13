@@ -38,7 +38,7 @@ var tileIdMap = map[tileId]rune{
 	empty:  ' ',
 	wall:   '#',
 	block:  '▧',
-	paddle: '🤽',
+	paddle: '🏊',
 	ball:   '🏐',
 }
 
@@ -102,9 +102,9 @@ func drawSleep(s tcell.Screen, speed time.Duration) {
 func runGame(s tcell.Screen, inputs chan<- int, outputs <-chan int, keys <-chan rune, quit <-chan bool) {
 	var ok bool
 	var x, y, obj int
-	var paddleX int
 	var tid tileId
-	var k rune
+	var k, char rune
+	var ballX, ballY, paddleX, paddleY int
 
 	scoreEnd := len("Score: ")
 	speed := defaultSpeed
@@ -128,28 +128,40 @@ func runGame(s tcell.Screen, inputs chan<- int, outputs <-chan int, keys <-chan 
 			y = <-outputs
 			obj = <-outputs
 
-			tid = tileId(obj)
-			s.SetContent(x, y+1, tileIdMap[tid], nil, blackCell)
-
 			if x == -1 && y == 0 {
 				for i, digit := range getDigits(obj) {
 					s.SetContent(scoreEnd+i, 0, digit, nil, blackCell)
 				}
+				s.Sync()
+				continue
 			}
-			s.Sync()
 
-			switch tid {
+			switch tid = tileId(obj); tid {
 			case paddle:
 				paddleX = x
+				paddleY = y
+				if paddleY < ballY+3 {
+					char = '🤽'
+				} else {
+					char = tileIdMap[paddle]
+				}
 			case ball:
-				if x < paddleX {
+				ballX = x
+				ballY = y
+				if ballX < paddleX {
 					inputs <- paddleLeft
-				} else if x > paddleX {
+				} else if ballX > paddleX {
 					inputs <- paddleRight
 				} else {
 					inputs <- paddleStay
 				}
+				char = tileIdMap[ball]
+			default:
+				char = tileIdMap[tid]
 			}
+
+			s.SetContent(x, y+1, char, nil, blackCell)
+			s.Sync()
 
 			time.Sleep(speed)
 
