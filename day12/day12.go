@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	// moonPositionsFile = "day12-example1.txt"
 	moonPositionsFile = "day12-input.txt"
 	steps             = 1000
 )
@@ -42,7 +43,7 @@ func readMoonPositions(filename string) map[string]*Moon {
 	f, _ := os.Open(moonPositionsFile)
 	defer f.Close()
 
-	fmt.Println("Loading moons:")
+	// fmt.Println("Loading moons:")
 	moons := make(map[string]*Moon)
 	scanner := bufio.NewScanner(f)
 	i := 0
@@ -53,7 +54,7 @@ func readMoonPositions(filename string) map[string]*Moon {
 		velocity := point.Point3D{X: 0, Y: 0, Z: 0}
 		moon := &Moon{position: position, velocity: velocity}
 		moons[moonNames[i]] = moon
-		fmt.Printf("%d. %s: %v\n", i+1, moonNames[i], *moon)
+		// fmt.Printf("%d. %s: %v\n", i+1, moonNames[i], *moon)
 		i++
 	}
 	return moons
@@ -137,25 +138,44 @@ func calculateTotalEnergy(moons map[string]*Moon) int {
 		kineticEnergy := math.Abs(float64(moon.velocity.X)) + math.Abs(float64(moon.velocity.Y)) + math.Abs(float64(moon.velocity.Z))
 		subTotal := int(potentialEnergy * kineticEnergy)
 		totalEnergy += subTotal
-		fmt.Printf("potential: %3v   kinetic: %3v   subtotal: %v\n", potentialEnergy, kineticEnergy, subTotal)
+		// fmt.Printf("potential: %3v   kinetic: %3v   subtotal: %v\n", potentialEnergy, kineticEnergy, subTotal)
 	}
-	fmt.Println("Total:", totalEnergy)
+	// fmt.Println("Total:", totalEnergy)
 	return totalEnergy
+}
+
+func calculateStateHash(moons map[string]*Moon) string {
+	hash := ""
+	for _, moonName := range moonNames {
+		hash += moons[moonName].position.String()
+		hash += moons[moonName].velocity.String()
+	}
+	return hash
 }
 
 func main() {
 	moons := readMoonPositions(moonPositionsFile)
 	fmt.Println()
 
-	for i := 0; i < steps; i++ {
+	history := make(map[string]bool)
+
+	for i := 0; ; i++ {
 		velocities := applyGravity(moons)
 		applyVelocity(moons, velocities)
 
-		fmt.Printf("After %d steps:\n", i+1)
-		printMoons(moons)
-		fmt.Println()
+		// fmt.Printf("After %d steps:\n", i+1)
+		// printMoons(moons)
+		// fmt.Println()
 
-		fmt.Printf("Energy after %d steps:\n", i+1)
-		calculateTotalEnergy(moons)
+		// fmt.Printf("Energy after %d steps:\n", i+1)
+		// calculateTotalEnergy(moons)
+
+		hash := calculateStateHash(moons)
+		if _, ok := history[hash]; ok {
+			fmt.Println(i)
+			break
+		} else {
+			history[hash] = true
+		}
 	}
 }
