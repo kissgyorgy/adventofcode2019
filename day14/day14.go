@@ -5,15 +5,22 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"strconv"
 	"strings"
 )
 
 const (
-	reactionsFile = "day14-input.txt"
+	// reactionsFile = "day14-input.txt"
+	reactionsFile = "example1.txt"
 )
 
 type chemical string
+
+const (
+	ORE  = chemical("ORE")
+	FUEL = chemical("FUEL")
+)
 
 type chemIO struct {
 	chem chemical
@@ -62,10 +69,44 @@ func parseReactions(content []byte) []reaction {
 	return reactions
 }
 
+func searchInputs(reactions []reaction, chem chemical, qty int) int {
+	var inputs []chemIO
+	var mul, outQty int
+
+	fmt.Println("Start searching", chem)
+	for _, r := range reactions {
+		fmt.Println("Current reaction:", r)
+		if r.output.chem == chem {
+			inputs = r.inputs
+			outQty = r.output.qty
+			mul = int(math.Ceil(float64(qty / outQty)))
+			fmt.Println("Found inputs for chem:", inputs)
+			break
+		}
+	}
+	fmt.Println("Inputs:", inputs)
+
+	if inputs[0].chem == ORE {
+		fmt.Println("Found ORE:", inputs[0].qty)
+		return inputs[0].qty
+	}
+
+	var sum int
+	for _, ch := range inputs {
+		fmt.Println("Searching for", ch.chem)
+		sum += searchInputs(reactions, ch.chem, mul*ch.qty)
+		fmt.Println("Subtotal:", sum)
+	}
+
+	return sum
+}
+
 func main() {
 	content, _ := ioutil.ReadFile(reactionsFile)
 	reactions := parseReactions(content)
 	for _, r := range reactions {
-		fmt.Println(r)
+		fmt.Println(r.inputs, "-->", r.output)
 	}
+	total := searchInputs(reactions, FUEL, 1)
+	fmt.Println("Result:", total)
 }
